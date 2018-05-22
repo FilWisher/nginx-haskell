@@ -1,8 +1,38 @@
 NGINX-HASKELL
-
 An nginx module for writing request handlers in Haskell
 
-TODO
-  o Write a Storable instance for WAI Request
-  o Initialize RTS in each worker
-  o Call into basic logging function in Haskell to log Request
+EXAMPLE
+Nginx configuration:
+    server {
+        # ...
+        location ~ / {
+            haskell MyHaskellModule handler;
+        }
+    }
+
+Haskell module:
+    module MyHaskellModule where
+
+    import qualified Nginx.Core as Nginx
+    import qualified Nginx.HTTP sa Nginx
+
+    handler :: Nginx.Request -> IO Nginx.Response
+    handler = ...
+
+    foreign export ccall handler :: Nginx.Request -> IO Nginx.Response
+
+IMPLEMENTATION
+Currently, the implementation plan involves 3 main pieces:
+    o A core NGINX module in C
+    o Some Haskell FFI glue to be statically compiled into the core module
+    o A collection of modules for writing dynamically Haskell libraries
+
+The user of the module is expected to write dynamic Haskell libraries that use
+the `{-# ForeignFunctionInterface #-}` language extension to expose request
+handlers and middlewares using `foreign export`.
+
+The types of the exported functions, as well as utilities for working with
+these, will be imported from the Haskell modules defined here.
+
+The objective is to use WAI requests and responses to in order to use the
+existing ecosystem around them.
