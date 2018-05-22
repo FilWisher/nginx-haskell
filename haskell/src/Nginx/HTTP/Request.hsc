@@ -76,9 +76,8 @@ instance Storable NgxRequest where
 handle :: Request -> IO Response
 handle req =
     -- return $ ResponseStream (Status 200 "OK") [] $ \write flush -> do
-    --     write "hello"
-    --     write "That's really nice"
-    --     write "This is neat as fuck"
+    --     write "Hello"
+    --     write " Haskell!"
     --     flush
     return $ ResponseBuilder (Status 200 "OK") [] $ BB.byteString "Hello haskell"
     
