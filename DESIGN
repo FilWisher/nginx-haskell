@@ -1,0 +1,68 @@
+DESIGN
+
+```
+# nginx.conf
+
+http {
+  haskell_module mymodule "MyHaskellModule";
+  ...
+  server {
+    haskell_module anothermodule "MyOtherHaskellModule";
+
+    location / {
+      haskell mymodule "handleRequest";
+    }
+
+    location /path {
+      haskell anothermodule "handleAnotherRequest";
+    }
+  }
+}
+```
+
+Allow directives for dynamically loading Haskell modules. When parsing the
+directive, we get the string argument and attempt to load the module with
+`dlopen` and store the handle in a datastructure:
+
+```
+struct haskell_module {
+  void *handle;
+  ngx_str_t name;
+  struct haskell_module *next;
+};
+```
+
+The haskell_module list of a location config will link to the haskell_module
+list of the parent server config. This means the modules will be scoped to their
+block.
+
+The directive for calling handlers from dynamic libraries requires specifying
+the bound name of the module and the top-level function from that module. The
+top-level function must be a Wai application.
+
+```
+{-# LANGUAGE ForeignFunctionInterface #-}
+
+module MyHaskellModule where
+
+import Network.Wai
+
+handleRequest :: Application
+handleRequest req respond =
+  respond $ responseLBS status200 [] "Hello world"
+
+```
+
+```
+module MyOtherHaskellModule where
+
+import Network.Wai
+
+handleAnotherRequest :: Application
+handleAnotherRequest req respond =
+  respond $ responseLBS status200 [] "Another handler!"
+```
+
+The Wai Request is parsed from the NGINX request struct. The response generated
+by the Wai Application is serialized and passed back to NGINX to send to the
+client.

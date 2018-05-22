@@ -1,0 +1,8 @@
+NGINX-HASKELL
+
+An nginx module for writing request handlers in Haskell
+
+TODO
+  o Write a Storable instance for WAI Request
+  o Initialize RTS in each worker
+  o Call into basic logging function in Haskell to log Request

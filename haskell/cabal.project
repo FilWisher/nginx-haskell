@@ -1,0 +1,10 @@
+packages: nginx-haskell.cabal
+
+package nginx-haskell
+  extra-include-dirs:  /home/william/src/nginx/src/http/
+                     , /home/william/src/nginx/src/core/
+                     , /home/william/src/nginx/src/event/
+                     , /home/william/src/nginx/src/http/modules/
+                     , /home/william/src/nginx/objs/
+                     , /home/william/src/nginx/src/os/unix/
+                     , /usr/include
