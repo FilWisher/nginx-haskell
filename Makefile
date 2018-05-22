@@ -11,12 +11,12 @@ ALL_INCS = \
 	-I/usr/include
 
 HASKELL_SRC := $(shell find haskell/src -name *.hs*)
-haskell/libNgxRequest.so: $(HASKELL_SRC)
+haskell/libNginxHS.so: $(HASKELL_SRC)
 	cd haskell && cabal new-build
 
 test.o: haskell/libNgxRequest.so test.c
 	ghc -static -c -no-hs-main -optc-O $(ALL_INCS) test.c  -L./haskell -o test.o -lNgxRequest -optl-Wl,-rpath,$(PWD)/haskell
 
-ngx_http_haskell_module.o: haskell/libNgxRequest.so src/ngx_http_haskell_module.c src/ngx_http_haskell_output.c src/ngx_http_haskell_module.h
-	ghc -static -c -no-hs-main -optc-O $(ALL_INCS) src/ngx_http_haskell_output.c src/ngx_http_haskell_module.c  -L./haskell \
+ngx_http_haskell_module.o: haskell/libNginxHS.so src/ngx_http_haskell_module.c src/ngx_http_haskell_module.h
+	ghc -static -c -no-hs-main -optc-O $(ALL_INCS) src/ngx_http_haskell_module.c  -L./haskell \
 	  -o ngx_http_haskell_module.o -lNgxRequest -optl-Wl,-rpath,$(PWD)/haskell

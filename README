@@ -36,3 +36,19 @@ these, will be imported from the Haskell modules defined here.
 
 The objective is to use WAI requests and responses to in order to use the
 existing ecosystem around them.
+
+CURRENT STATE
+In order to build, this requires some hacking. I haven't yet worked out how to
+improve this but I haven't spent enough time trying. I'm sure it's easily
+solvable with the right knowledge.
+
+    o Run the make target for ngx_http_haskell_module.o
+    o Add the `-v` to `ghc-options` in `nginx-haskell.cabal`
+    o Copy the linker flags output from this process
+      NOTE: these flags may be the same as $NIX_LDFLAGS
+    o `./auto/configure` nginx with the `--add-module=<path-to-haskell-module>`
+      flag
+    o Add these flags to `objs/Makefile` so the nginx will build
+    o Run `make` from within the `nginx` sources.
+    o Run `rm objs/nginx && make` to just rebuild the binary without deleting
+      the hande edited Makefile
