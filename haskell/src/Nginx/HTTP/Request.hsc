@@ -17,6 +17,7 @@ import Nginx.Core
 import Nginx.HTTP.Request.Headers
 
 import Network.Wai (StreamingBody(..))
+import Network.HTTP.Types (Status(..))
 
 import Data.ByteString.Char8 (ByteString(..))
 import qualified Data.ByteString as BS
@@ -138,30 +139,6 @@ send_response resp req = do
             sendHeaders req status
             writeChunk req chunk
             flush req
-
-            
-
-
-data Status = Status
-  { statusCode    :: Int
-  , statusMessage :: ByteString
-  }
-  deriving (Show)
-
-instance Storable Status where
-  sizeOf _ = (#size ngx_haskell_status_t)
-  alignment _ = 8
-  peek ptr =
-    Status
-      <$> (#peek ngx_haskell_status_t, status_code) ptr
-      <*> return "hello"
-
-  poke ptr (Status code msg) = do
-    ((#poke ngx_haskell_status_t, status_code) ptr) (fromIntegral code :: CUInt)
-    BS.useAsCStringLen msg $ \(cstr, len) ->
-      copyArray msgPtr cstr (min (#const MAX_STATUS_MESSAGE) len)
-    where
-      msgPtr = ptr `plusPtr` (#offset ngx_haskell_status_t, msg)
 
 -- TODO: foreign export function for taking a raw request pointer and a response and sending it
 -- TODO: call the request handler and fill the C-allocated response using it
