@@ -10,32 +10,32 @@ import Foreign.C.String
 
 import Control.Monad (forM_)
 
-import Nginx.Core.String
-import Nginx.Core.List
-import Nginx.Core.Hash
+import qualified Nginx.Core.String as Nginx
+import qualified Nginx.Core.List as Nginx
+import qualified Nginx.Core.Hash as Nginx
 
 #include "ngx_http.h"
 
-data NgxHeadersIn = NgxHeadersIn
-  { headers :: NgxList NgxTableElt
+data HeadersIn = HeadersIn
+  { headers :: Nginx.List Nginx.TableElt
   }
   deriving (Show)
 
-instance Storable NgxHeadersIn where
+instance Storable HeadersIn where
   sizeOf _ = (#size ngx_http_headers_in_t)
   alignment _ = 8
   peek ptr =
-    NgxHeadersIn <$> (#peek ngx_http_headers_in_t, headers) ptr
+    HeadersIn <$> (#peek ngx_http_headers_in_t, headers) ptr
   poke = undefined
 
-print_headers :: Ptr NgxHeadersIn -> IO ()
+print_headers :: Ptr HeadersIn -> IO ()
 print_headers ptr = do
   ngx_headers <- peek ptr
-  forM_ (toList $ headers ngx_headers) printElt 
+  forM_ (Nginx.toList $ headers ngx_headers) printElt 
   print =<< peek ptr
   where
-    printElt (NgxTableElt _ key val) = do
-      print $ toInternalByteString key
-      print $ toInternalByteString val
+    printElt (Nginx.TableElt _ key val) = do
+      print $ Nginx.toInternalByteString key
+      print $ Nginx.toInternalByteString val
 
-foreign export ccall print_headers :: Ptr NgxHeadersIn -> IO ()
+foreign export ccall print_headers :: Ptr HeadersIn -> IO ()

@@ -13,7 +13,7 @@ import Foreign.C.String
 
 import Control.Monad (forM_)
 
-import Nginx.Core
+import qualified Nginx.Core as Nginx
 import Nginx.HTTP.Request.Headers
 
 import Network.Wai (StreamingBody(..))
@@ -28,11 +28,11 @@ import qualified Data.ByteString.Lazy as BL
 #include "ngx_http_haskell_module.h"
 
 data NgxRequest = NgxRequest
-  { ngxMethod :: NgxString
-  , ngxHttpVersion :: NgxString
-  , ngxUri :: NgxString
-  , ngxQueryString :: NgxString
-  , ngxHeadersIn :: NgxHeadersIn
+  { ngxMethod :: Nginx.String
+  , ngxHttpVersion :: Nginx.String
+  , ngxUri :: Nginx.String
+  , ngxQueryString :: Nginx.String
+  , ngxHeadersIn :: HeadersIn
 
   , ngxPool :: Ptr ()
   , rawRequest :: Ptr ()
@@ -48,13 +48,13 @@ data Request = Request
   }
   deriving (Show)
 
-toRequest :: (NgxString -> ByteString) -> NgxRequest -> Request
+toRequest :: (Nginx.String -> ByteString) -> NgxRequest -> Request
 toRequest toBS NgxRequest{..} = Request
   { method      = toBS ngxMethod
   , httpVersion = toBS ngxHttpVersion
   , uri         = toBS ngxUri
   , queryString = toBS ngxQueryString
-  , headersIn = map (\(NgxTableElt _ key val) -> (toBS key, toBS val)) (toList $ headers ngxHeadersIn)
+  , headersIn = map (\(Nginx.TableElt _ key val) -> (toBS key, toBS val)) (Nginx.toList $ headers ngxHeadersIn)
   }
 
 instance Storable NgxRequest where
@@ -87,15 +87,15 @@ print_request ptr = do
   print "printing request"
   print (#offset ngx_http_request_t, headers_in)
   ngx_request <- peek ptr
-  forM_ (toList $ headers $ ngxHeadersIn ngx_request) printElt 
-  print (toRequest toInternalByteString ngx_request)
-  res <- handle (toRequest toInternalByteString ngx_request)
+  forM_ (Nginx.toList $ headers $ ngxHeadersIn ngx_request) printElt 
+  print (toRequest Nginx.toInternalByteString ngx_request)
+  res <- handle (toRequest Nginx.toInternalByteString ngx_request)
   send_response res ngx_request
   return 42
   where
-    printElt (NgxTableElt _ key val) = do
-      print $ toInternalByteString key
-      print $ toInternalByteString val
+    printElt (Nginx.TableElt _ key val) = do
+      print $ Nginx.toInternalByteString key
+      print $ Nginx.toInternalByteString val
 
 foreign export ccall print_request :: Ptr NgxRequest -> IO CInt
 

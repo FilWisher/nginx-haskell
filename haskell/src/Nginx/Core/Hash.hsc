@@ -12,30 +12,30 @@ import Control.Monad (forM_)
 
 #include "ngx_core.h"
 
-import Nginx.Core.String
+import qualified Nginx.Core.String as Nginx
 
-data NgxTableElt = NgxTableElt
+data TableElt = TableElt
   { hash :: CUInt
-  , key :: NgxString
-  , value :: NgxString
+  , key :: Nginx.String
+  , value :: Nginx.String
   }
   deriving (Show)
 
-instance Storable NgxTableElt where
+instance Storable TableElt where
   sizeOf _ = (#size ngx_table_elt_t)
   alignment _ = 8
   peek ptr = do
-    NgxTableElt
+    TableElt
       <$> (#peek ngx_table_elt_t, hash) ptr
       <*> (#peek ngx_table_elt_t, key) ptr
       <*> (#peek ngx_table_elt_t, value) ptr
   poke = undefined
 
-print_hash :: Ptr NgxTableElt -> IO ()
+print_hash :: Ptr TableElt -> IO ()
 print_hash ptr = do
   elt <- peek ptr
   print $ elt
-  print $ toInternalByteString (key elt)
-  print $ toInternalByteString (value elt)
+  print $ Nginx.toInternalByteString (key elt)
+  print $ Nginx.toInternalByteString (value elt)
 
-foreign export ccall print_hash :: Ptr NgxTableElt -> IO ()
+foreign export ccall print_hash :: Ptr TableElt -> IO ()
