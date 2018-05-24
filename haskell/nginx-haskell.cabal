@@ -11,9 +11,12 @@ author:              William Fisher
 maintainer:          williamsykesfisher@gmail.com
 -- copyright:
 category:            Web
-build-type:          Simple
+build-type:          Custom
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
+
+custom-setup
+  setup-depends: Cabal, base
 
 foreign-library NginxHS
   type:                native-shared

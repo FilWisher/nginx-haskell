@@ -8,7 +8,6 @@ extern void __stginit_NgxRequest(void);
 #include <string.h>
 #include <HsFFI.h>
 
-#include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include "ngx_http_haskell_module.h"

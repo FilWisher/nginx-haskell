@@ -5,3 +5,4 @@ haskell/dist
 haskell/dist-newstyle
 haskell/cabal.project.local
 .ghc.environment.*
+config
